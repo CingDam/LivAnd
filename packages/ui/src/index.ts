@@ -1,2 +1,2 @@
-export * from "./button";
-export { default as SearchBar } from "./SearchBar";
+export * from "./components/Button/LoginButton";
+export { default as SearchBar } from "./components/SearchBar";
