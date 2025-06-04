@@ -28,6 +28,7 @@ const LoginBox = () => {
                     <div className="font-bold mt-8">비밀번호</div>
                     <input
                         className="mt-[10px] border-[0.5px] outline-none border-[#989898] w-full px-2 py-1"
+                        type='password'
                     />
                 </div>
                 <div className="flex mt-3">
