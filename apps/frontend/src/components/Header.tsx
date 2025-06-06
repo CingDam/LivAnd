@@ -15,7 +15,7 @@ const Header = () => {
 
 
     return (
-        <div className='flex justify-center item-center fixed w-[64rem] bg-white h=[55px]'>
+        <div className='flex justify-center item-center fixed w-[64rem] bg-white h=[55px] z-10'>
             <HamburgerMd className="w-10 h-10 cursor-pointer ml-[25px]" />
             <span
                 className='font-[Sunshiney] text-4xl cursor-pointer ml-[38px]'

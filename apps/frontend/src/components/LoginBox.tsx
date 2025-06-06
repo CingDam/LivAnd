@@ -11,7 +11,7 @@ const LoginBox = () => {
     const nav = useRouter();
 
     const signup = () => {
-        nav.push("../signup")
+        nav.push("/signup")
     }
 
   return (
@@ -40,8 +40,8 @@ const LoginBox = () => {
                         <span className="font-light ml-2">자동로그인</span>
                     </label>
                     <div className='flex space-x-4 font-bold ml-[28.5%]'>
-                        <span className="text-gray-400 cursor-pointer">아이디 찾기</span>
-                        <span className="text-gray-400 cursor-pointer">비밀번호 재설정</span>
+                        <span className="text-gray-400 cursor-pointer hover:text-black transition-color duration-300">아이디 찾기</span>
+                        <span className="text-gray-400 cursor-pointer hover:text-black transition-color duration-300">비밀번호 재설정</span>
                     </div>
                 </div>
             </div>
