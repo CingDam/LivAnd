@@ -298,8 +298,8 @@ const SignUpBox = () => {
                         pwdMatch === true && "text-green-600",
                     )}>
                         {pwdMatch === null && "비밀번호를 다시 입력해주세요"}
-                        {pwdMatch === false && "비밀번호 조건에 맞지 않습니다."}
-                        {pwdMatch === true && "비밀번호 조건에 맞습니다."}
+                        {pwdMatch === false && "비밀번호가 일치하지 않습니다."}
+                        {pwdMatch === true && "비밀번호가 일치합니다."}
                     </div>
                 </div> 
                 <div className="space-y-1 mb-7">
