@@ -21,7 +21,7 @@ export class AppController {
 
     await transporter.sendMail({
       from: '"인증 시스템" <your_email@gmail.com>',
-      to: "smhrd0113@gmail.com",
+      to: body.email, // 사용자 이메일로 전송
       subject: 'LivAnd 이메일 인증코드 메일입니다',
       html: `<h3>인증 코드: <b>${code}</b></h3>`,
     });

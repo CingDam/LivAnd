@@ -25,12 +25,12 @@ export class UserService {
 
         // 사용자 정보 생성 및 저장
         const user = this.userRepository.create({
-        user_email,
-        user_pwd: hash,
-        user_nickname,
-        user_phone,
-        create_date: new Date(), // 가입 일시 수동 설정
-        point: 0,                // 초기 포인트 0
+            user_email,
+            user_pwd: hash,
+            user_nickname,
+            user_phone,
+            create_date: new Date(), // 가입 일시 수동 설정
+            point: 0,                // 초기 포인트 0
         });
 
         await this.userRepository.save(user);
