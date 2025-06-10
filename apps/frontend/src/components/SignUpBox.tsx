@@ -77,8 +77,8 @@ const SignUpBox = () => {
         api.post('/auth/send-email',{
             to: "smhrd0113@gmail.com",
         }).then(res => {
-            console.log(res);
-            setValidateValue(res.data.value);
+            console.log(res.data.code);
+            setValidateValue(res.data.code);
         }).catch(
             err => console.error(err)
         )
@@ -87,9 +87,13 @@ const SignUpBox = () => {
     // 인증번호 검증 함수
     const emailValidate = (value: string) => {
         setEmailChkValue(value);
-        if(validateValue === emailChkValue) {
+        console.log(`입력값 : ${emailChkValue} 인증번호: ${validateValue}`);
+        console.log(typeof(validateValue));
+        if(validateValue == emailChkValue) {
+            alert("인증번호가 일치 합니다!")
             setIsEmailValidate(true);
         } else {
+            alert("인증번호가 맞지 않습니다!")
             setIsEmailValidate(false);
         }
     }
@@ -197,7 +201,7 @@ const SignUpBox = () => {
         setName("");
         setPhonePrefix("010");
         setPhoneMiddle("");
-        setPhonePrefix("");
+        setPhoneLast("");
         setIsAddressValid(false);
         setIsEmailValidate(false);
         setIsPwdValid(false);
@@ -262,7 +266,7 @@ const SignUpBox = () => {
                         isPwdValid === false && "border-red-400",
                         isPwdValid === true && "border-green-600"
                     )}
-                        autoComplete='new-password'
+                        value={pwd}
                         onChange={e => pwdRegexCheck(e.target.value)}
                         ref={pwdRef}
                     />

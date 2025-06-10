@@ -20,6 +20,7 @@
   "workspaces": [
     "apps/*",
     "packages/*"
+<<<<<<< Updated upstream
   ],
   "dependencies": {
     "nodemailer": "^7.0.3"
@@ -30,4 +31,7 @@
     "mysql2": "^3.14.1",
     "typeorm": "^0.3.24"
   }
+=======
+  ]
+>>>>>>> Stashed changes
 }
