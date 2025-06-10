@@ -20,6 +20,7 @@
   "workspaces": [
     "apps/*",
     "packages/*"
+<<<<<<< Updated upstream
   ],
   "dependencies": {
     "@nestjs/typeorm": "^11.0.0",
@@ -29,4 +30,7 @@
     "mysql2": "^3.14.1",
     "typeorm": "^0.3.24"
   }
+=======
+  ]
+>>>>>>> Stashed changes
 }

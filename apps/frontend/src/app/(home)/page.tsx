@@ -1,5 +1,6 @@
 export default function main() {
     return (
+<<<<<<< Updated upstream
         <div className="h-[calc(100%-55px)] pt-[55px]">
             <div className="w-[95%] h-[480px] mt-3 mx-auto">
                 <img className="w-full h-full object-cover object-[center_top]" src="/banner/banner01.png"></img>
@@ -25,5 +26,10 @@ export default function main() {
                 </li>
             </ul>
         </div>
+=======
+        <div className="min-h-screen flex flex-col pt-[55px] bg-white">
+            <Index/>
+        </div>  
+>>>>>>> Stashed changes
     )
 }

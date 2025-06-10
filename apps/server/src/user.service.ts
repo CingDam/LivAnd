@@ -33,8 +33,8 @@ export class UserService {
         point: 0,                // 초기 포인트 0
         });
 
-        await this.userRepository.save(user);
-        return { message: '회원가입 완료' };
+        const newUser = await this.userRepository.save(user);
+        return { message: '회원가입 완료', success: !!newUser };
     }
 }
     

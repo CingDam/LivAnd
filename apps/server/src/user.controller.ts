@@ -9,6 +9,7 @@ export class UserController {
   @Post()
   create(@Body() dto: CreateUserDto) {
     console.log('회원가입 요청', dto);
-    return this.userService.signup(dto);
+    const newUser = this.userService.signup(dto);
+    return newUser;
   }
 }
