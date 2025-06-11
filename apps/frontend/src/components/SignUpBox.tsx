@@ -75,7 +75,7 @@ const SignUpBox = () => {
     const sendEmail = () => {
         setSend(true);
         api.post('/auth/send-email',{
-            to: "smhrd0113@gmail.com",
+            to: userBody.user_email,
         }).then(res => {
             console.log(res.data.code);
             setValidateValue(res.data.code);
