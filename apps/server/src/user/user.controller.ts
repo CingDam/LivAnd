@@ -7,15 +7,19 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() dto: CreateUserDto) {
+  async create(@Body() dto: CreateUserDto) {
     console.log('회원가입 요청', dto);
-    const newUser = this.userService.signup(dto);
-    return newUser;
+    const newUser = await this.userService.signup(dto);
+    if(newUser === true) {
+      return {message: "회원가입 성공", success: true};
+    } else {
+      return {message: "회원가입 실패", success: false};
+    }
   }
   // 이메일 중복 확인
   @Get('check-email')
   async checkEmail(@Query('email') email: string) {
     const isTaken = await this.userService.isEmailTaken(email);
-    return { isTaken }; 
+    return { validate: isTaken }; 
   }
 }

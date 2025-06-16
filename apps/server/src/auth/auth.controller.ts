@@ -27,8 +27,6 @@ export class AuthController {
       html: `<h3>인증 코드: <b>${code}</b></h3>`,
     });
 
-
-
     return {
       message: '이메일이 전송되었습니다.',
       code, // 프론트로 인증번호도 같이 전송

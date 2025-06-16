@@ -13,6 +13,7 @@ const SignUpBox = () => {
     const [send,setSend] = useState(false);
     // String타입만 들어오게
     // 이메일 state
+    const [isEmailExist, setIsEmailExist] = useState(false);
     const [emailId,setEmailId] = useState<string>("");
     const [emailAdd,setEmailAdd] = useState<string>("");
     const [emailChkValue, setEmailChkValue] = useState<string>("");
@@ -69,6 +70,19 @@ const SignUpBox = () => {
         if(domainRegex.test(emailAdd)) {
             setIsAddressValid(true);
         }
+    }
+
+    const handleEmailCheck = () => {
+        api.get("/user/check-email",{params: {email: userBody.user_email}})
+        .then(res => {
+            if(res.data.validate === false) {
+                alert("사용가능한 이메일 입니다!")
+                setIsEmailExist(true)
+            } else {
+                alert("이미 있는 이메일 입니다!")
+                emailIdRef.current?.focus();
+            }
+        });
     }
 
     // 인증번호 전송 함수
@@ -242,7 +256,11 @@ const SignUpBox = () => {
                                 value={emailAdd} onChange={e => emailRegexCheck(e.target.value)}
                                 ref={emailAddRef}
                         />
-                        <DefaultButtons size="sm" className="font-regular" onClick={sendEmail}>전송하기</DefaultButtons>
+                        {
+                            isEmailExist ?
+                            <DefaultButtons size="sm" className="font-regular" onClick={sendEmail}>전송하기</DefaultButtons> :
+                            <DefaultButtons size="sm" className="font-regular" onClick={handleEmailCheck}>중복확인</DefaultButtons>
+                        }
                     </div>
                 </div>
                 <div className={clsx(

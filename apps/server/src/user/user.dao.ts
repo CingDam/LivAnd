@@ -16,24 +16,12 @@ export class UserRepository {
     return this.repo.findOneBy({ user_email });
   }
 
-  createUser(data: Partial<User>) {
-    return this.repo.create(data);
-  }
-
-  async saveUser(user: User) {
-    return this.repo.save(user);
-  }
-
   // 회원가입
-   async registerUser(dto: CreateUserDto): Promise<void> {
-    const exist = await this.findByEmail(dto.user_email);
-    if (exist) {
-      throw new Error('이미 가입된 이메일');
-    }
+   async registerUser(dto: CreateUserDto): Promise<User> {
 
     const hash = await bcrypt.hash(dto.user_pwd, 10);
 
-    const user = this.createUser({
+    const user = this.repo.create({
       user_email: dto.user_email,
       user_pwd: hash,
       user_nickname: dto.user_nickname,
@@ -42,6 +30,8 @@ export class UserRepository {
       point: 0,
     });
 
-    await this.saveUser(user);
+    const newUser = await this.repo.save(user);
+
+    return newUser
   }
 }
