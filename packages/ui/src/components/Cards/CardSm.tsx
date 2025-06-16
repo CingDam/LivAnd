@@ -1,3 +1,4 @@
+
 import { StarIcon } from "@heroicons/react/16/solid";
 
 export function CardSm() {

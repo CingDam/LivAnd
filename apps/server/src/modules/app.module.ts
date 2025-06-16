@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UserController } from 'src/user/user.controller';
 import { AuthModule } from './auth.module';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -14,7 +15,7 @@ import { AuthModule } from './auth.module';
     TypeOrmModule.forRoot(typeOrmConfig),
     UserModule, AuthModule
   ],
-  controllers: [],
+  controllers: [UserController],
   providers: [],
 })
 export class AppModule {}
