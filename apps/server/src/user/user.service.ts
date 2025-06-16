@@ -15,8 +15,12 @@ export class UserService {
 
   async signup(dto: CreateUserDto) {
     try {
-      await this.userRepository.registerUser(dto);
-      return { message: '회원가입 완료' };
+      const newUser = await this.userRepository.registerUser(dto);
+      if(newUser) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (err) {
       throw new BadRequestException(err.message);
     }

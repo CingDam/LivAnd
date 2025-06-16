@@ -35,7 +35,9 @@ const LoginBox = () => {
         })
         .catch((err) => {
             console.error(err);
-            alert(`로그인 실패! ${err}`)
+            alert(`로그인 실패! ${err}`);
+            setPwd("");
+            setEmail("");
         })
     }
 
@@ -72,7 +74,7 @@ const LoginBox = () => {
                         </div>
                     </div>
                 </div>
-                <LoginButton className="mt-10 w-[70%] mx-auto block">로그인</LoginButton>
+                <LoginButton className="mt-10 w-[70%] mx-auto block" onClick={handleLogin}>로그인</LoginButton>
                 <div className='text-gray-400 font-bold mx-auto mt-3'>
                     계정이 없으신가요? <span className='text-black ml-3 cursor-pointer' onClick={signup}>회원가입 하러가기</span>
                 </div>
