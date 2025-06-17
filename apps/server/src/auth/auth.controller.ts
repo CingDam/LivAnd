@@ -19,7 +19,7 @@ export class AuthController {
         pass: 'bhlefimthuqwmowh',          // 👈 앱 비밀번호
       },
     });
-
+    
     await transporter.sendMail({
       from: '"인증 시스템" <your_email@gmail.com>',
       to: body.to, // 사용자 이메일로 전송
