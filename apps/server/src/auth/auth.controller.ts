@@ -1,4 +1,12 @@
 
+import { Controller, Get, Query, Res, Redirect, Post, Body } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
+import { Response } from 'express';
+import axios from 'axios';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../user/user.entity'; // 경로는 실제 위치에 맞게 수정
+import { JwtService } from '@nestjs/jwt';
 import { Controller, Post, Body, Req } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { Request } from 'express'; // 세션 사용을 위해 필요
@@ -23,7 +31,12 @@ type CustomRequest = Request & {
 // Controller ()안에 명칭을 써주면 명칭을 기준점으로 주소가 생성
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {} //authService를 이 컨트롤러에 연결결 
+    constructor(
+      @InjectRepository(User)
+      private readonly userRepository: Repository<User>,
+      private readonly jwtService: JwtService,
+      private readonly authService: AuthService
+    ) {}
   
   // 로그인
    @Post('login')
@@ -45,7 +58,6 @@ export class AuthController {
     };
   }
   
-
   @Post('send-email')
   async sendCode(@Body() body: { to: string }) {
     const code = Math.floor(100000 + Math.random() * 900000);
@@ -72,5 +84,142 @@ export class AuthController {
       message: '이메일이 전송되었습니다.',
       code, // 프론트로 인증번호도 같이 전송
     };
+  }
+
+
+
+  // 🔻 여기부터 추가된 소셜 로그인 메서드들 🔻
+
+  @Get('kakao')
+  @Redirect()
+  kakaoLogin() {
+    const REST_API_KEY = process.env.KAKAO_CLIENT_ID;
+    const CLIENT_SECRET = process.env.KAKAO_CLIENT_SECRET;
+    const REDIRECT_URI = 'http://localhost:3001/auth/kakao/callback';
+    const state = Math.random().toString(36).slice(2);
+
+    const kakaoUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&state=${state}`;
+
+    console.log('Redirect URL:', kakaoUrl);
+
+    return { url: kakaoUrl };
+  }
+
+  @Get('kakao/callback')
+  async kakaoCallback(@Query('code') code: string, @Res() res: Response) {
+    try {
+      const tokenRes = await axios.post(
+        'https://kauth.kakao.com/oauth/token',
+        null,
+        {
+          params: {
+            grant_type: 'authorization_code',
+            client_id: '카카오 REST API 키',
+            redirect_uri: 'http://localhost:3001/auth/kakao/callback',
+            code,
+            client_secret: '카카오 client secret', // 선택사항
+          },
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+          },
+        },
+      );
+
+      const accessToken = tokenRes.data.access_token;
+
+      const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      const kakaoData = userRes.data;
+      const kakaoId = kakaoData.id.toString();
+      const email = kakaoData.kakao_account?.email || '';
+      const nickname = kakaoData.properties?.nickname || '';
+      const profileImage = kakaoData.properties?.profile_image || '';
+
+      let user = await this.userRepository.findOne({ where: { kakao_id : kakaoId } });
+      if (!user) {
+        user = this.userRepository.create({
+          kakao_id : kakaoId,
+          user_email : email,
+          user_nickname : nickname,
+          user_pwd: '',      // 소셜 로그인 시 임의 처리
+          user_phone: '',    // 소셜 로그인 시 임의 처리
+          // user_pwd나 user_phone은 소셜 로그인이라면 null 또는 빈 문자열로 처리 가능
+        });
+        await this.userRepository.save(user); // db에 저장
+      }
+
+      const jwt = this.jwtService.sign({ sub: user.user_num });
+
+      return res.redirect(`http://localhost:3000/social-login-success?token=${jwt}`);
+    } catch (err) {
+      console.error('카카오 로그인 실패:', err);
+      return res.status(500).send('카카오 로그인 실패');
+    }
+  }
+
+@Get('naver')
+@Redirect()
+naverLogin() {
+  const clientId = process.env.NAVER_CLIENT_ID;
+  const redirectUri = process.env.NAVER_REDIRECT_URI;
+  const state = Math.random().toString(36).substring(2);
+
+  const url = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+  return { url };
+}
+
+  @Get('naver/callback')
+  async naverCallback(@Query() query, @Res() res: Response) {
+    try {
+      const { code, state } = query;
+
+      const tokenRes = await axios.post(
+        `https://nid.naver.com/oauth2.0/token`,
+        null,
+        {
+          params: {
+            grant_type: 'authorization_code',
+            client_id: process.env.NAVER_CLIENT_ID,
+            client_secret: process.env.NAVER_CLIENT_SECRET,
+            code,
+            state,
+          },
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      );
+
+      const accessToken = tokenRes.data.access_token;
+
+      const userRes = await axios.get('https://openapi.naver.com/v1/nid/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      const naverData = userRes.data.response;
+      const naverId = naverData.id;
+      const email = naverData.email || '';
+      const nickname = naverData.nickname || '';
+
+      let user = await this.userRepository.findOne({ where: { naver_id : naverId } }); // kakao_id → 나중에 naver_id 따로 만들면 좋음
+      if (!user) {
+        user = this.userRepository.create({
+          naver_id: naverId, // 임시로 사용
+          user_email: email,
+          user_nickname: nickname,
+          user_pwd: '',
+          user_phone: '',
+        });
+        await this.userRepository.save(user);
+      }
+
+      const jwt = this.jwtService.sign({ sub: user.user_num });
+      return res.redirect(`http://localhost:3000/social-login-success?token=${jwt}`);
+    } catch (err) {
+      console.error('네이버 로그인 실패:', err);
+      return res.status(500).send('네이버 로그인 실패');
+    }
   }
 }

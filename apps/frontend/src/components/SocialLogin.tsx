@@ -8,11 +8,11 @@ const SocialLogin = () => {
 
 
   const handleNaverLogin = () => {
-    window.location.href = 'http://localhost:3001/auth/naver/login'
+    window.location.href = 'http://localhost:3001/auth/naver'
   }
 
   const handleKakaoLogin = () => {
-    window.location.href = 'http://localhost:3001/auth/kakao/login'
+    window.location.href = 'http://localhost:3001/auth/kakao'
   }
 
   return (
