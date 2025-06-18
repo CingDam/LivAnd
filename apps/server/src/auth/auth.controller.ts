@@ -1,10 +1,10 @@
 
-import { Controller, Post, Body, Req } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { Request } from 'express'; // 세션 사용을 위해 필요
 import { AuthService } from './auth.service'; // 로그인 처리 로직
 import { LoginDto } from './login.dto';       // 로그인 요청 DTO
-import { Session } from 'inspector/promises';
+
 
 // 세션에 저장할 유저 타입 정의
 interface SessionUser {
@@ -45,6 +45,20 @@ export class AuthController {
     };
   }
   
+  @Get('me') // 프론트에서 자동 로그인 확인 요청
+  me(@Req() req: CustomRequest) {
+  if (req.session.user) {
+    return {
+      loggedIn: true,
+      user: req.session.user,
+    };
+  } else {
+    return {
+      loggedIn: false,
+      message: '로그인되어 있지 않습니다.',
+    };
+  }
+}
 
   @Post('send-email')
   async sendCode(@Body() body: { to: string }) {

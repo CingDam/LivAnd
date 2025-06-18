@@ -20,7 +20,7 @@ export class AuthService {
     
     if (!isMatch) {
       //console.log('비밀번호 불일치');
-      throw new UnauthorizedException('비밀번호 틀렸습니다');
+      throw new UnauthorizedException('비밀번호가 틀렸습니다');
     }
     console.log('로그인 성공!:', user.user_num);
     return user;
