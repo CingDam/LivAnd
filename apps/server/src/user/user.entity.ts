@@ -18,11 +18,11 @@ export class User {
   @Column({ length: 16 })
   user_phone: string; 
 
-//   @Column({ nullable: true })
-//   kakao_id: string; // 카카오 로그인 ID (소셜 로그인용)
+  @Column({ nullable: true })
+  kakao_id: string; // 카카오 로그인 ID (소셜 로그인용)
 
-//   @Column({ nullable: true })
-//   naver_id: string; // 네이버 로그인 ID
+  @Column({ nullable: true })
+  naver_id: string; // 네이버 로그인 ID
 
   @CreateDateColumn({ type: 'datetime' })
   create_date: Date; // 가입 일시
