@@ -18,7 +18,24 @@ const LoginBox = () => {
         nav.push("/signup")
     }
 
+    const validateLoginForm = () => {
+        if(email == "") {
+            alert("이메일을 입력해주세요");
+            return false;
+        }
+
+        if(pwd == "") {
+            alert("비밀번호를 입력해주세요");
+            return false;
+        }
+
+        return true;
+    }
+
     const handleLogin = () => {
+
+        if(!validateLoginForm()) return;
+
         api.post("auth/login", {
             user_email: email,
             user_pwd: pwd
@@ -50,6 +67,11 @@ const LoginBox = () => {
                         <input
                             className="mt-[10px] border-[0.5px] outline-none border-[#989898] w-full px-2 py-1"
                             value={email} onChange={(e) => setEmail(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    handleLogin();
+                                }
+                            }}
                         />
                     </div>
                     <div>
@@ -58,6 +80,12 @@ const LoginBox = () => {
                             className="mt-[10px] border-[0.5px] outline-none border-[#989898] w-full px-2 py-1"
                             type='password'
                             value={pwd} onChange={(e) => setPwd(e.target.value)}
+                            onKeyDown={e => {
+                                if(e.key === 'Enter') {
+                                    console.log("눌림")
+                                    handleLogin();
+                                }
+                            }}
                         />
                     </div>
                     <div className="flex mt-3">
