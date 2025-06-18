@@ -24,8 +24,10 @@ export function CardLg({
 }) {
     return (
         <>
-            <div className="cursor-pointer">
-                <img src={tumbnail} alt="placeholder" className="w-[195px] h-[300px] object-cover object-[center_top]"/>
+            <div className="group cursor-pointer">
+                <div className="w-[285px] h-[405px] overflow-hidden">
+                    <img src={tumbnail} alt="placeholder" className="w-full h-full object-cover object-[center_top] transition:transform duration-300 group-hover:scale-105"/>
+                </div>
                 <div className="text-xs space-x-1 my-2">{tag.map((item,index)=><span>{item}</span>)}</div>
                 <div>
                     <p className="text-xl">{title}</p>
