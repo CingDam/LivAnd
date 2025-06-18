@@ -1,9 +1,10 @@
 
 'use client'
 import { useRouter } from 'next/navigation';
-import React from 'react'
+import React, { useState } from 'react'
 import { HamburgerMd, Heart02, ShoppingCart01, UserSquare } from 'react-coolicons';
 import { SearchBar } from '@repo/ui';
+import { useMenuStore } from '@/store/menuStore';
 
 const Header = () => {
 
@@ -13,10 +14,12 @@ const Header = () => {
         nav.push('./login');
     }
 
+    const toggleMenu = useMenuStore((state) => state.toggleMenu);
+
 
     return (
         <div className='flex justify-center item-center fixed w-[64rem] bg-white h=[55px] z-10'>
-            <HamburgerMd className="w-10 h-10 cursor-pointer ml-[25px]" />
+            <HamburgerMd className="w-10 h-10 cursor-pointer ml-[25px]" onClick={toggleMenu}/>
             <span
                 className='font-[Sunshiney] text-4xl cursor-pointer ml-[38px]'
                 onClick={()=>nav.replace('/')}
