@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
 interface menuState {
-    ieMenuOpen: boolean;
+    isMenuOpen: boolean;
     toggleMenu: () => void;
     closeMenu: () => void;
 }
 
 export const useMenuStore = create<menuState>((set) => ({
-    ieMenuOpen: false,
-    toggleMenu: () => set((state) => ({ieMenuOpen: !state.ieMenuOpen})),
-    closeMenu: () => set({ieMenuOpen: false})
+    isMenuOpen: false,
+    toggleMenu: () => set((state) => ({isMenuOpen: !state.isMenuOpen})),
+    closeMenu: () => set({isMenuOpen: false})
 }))
