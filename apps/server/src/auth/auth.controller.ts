@@ -133,6 +133,8 @@ export class AuthController {
       const nickname = kakaoData.properties?.nickname || '';
       const profileImage = kakaoData.properties?.profile_image || '';
 
+      console.log(kakaoId);
+
       let user = await this.userRepository.findOne({ where: { kakao_id : kakaoId } });
       if (!user) {
         user = this.userRepository.create({

@@ -77,7 +77,8 @@ const Index = () => {
                     )}>{item}</li>))}
                 </ul>
                 <div className='flex mt-9 space-x-6 justify-center'>
-                    {numArr.map((item,index) => <CardSm 
+                    {numArr.map((item,index) => <CardSm
+                        key={index}
                         tumbnail={`product/top/blouse-shirt/product${item}/thumbnail.jpg`} 
                         title={titleArr[index]}
                         tag={tagArr[index]}
