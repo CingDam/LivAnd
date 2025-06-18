@@ -1,5 +1,5 @@
 
-import { Controller, Get, Query, Res, Redirect, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, Res, Redirect, Post, Body, Req } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { Response } from 'express';
 import axios from 'axios';
@@ -7,8 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity'; // 경로는 실제 위치에 맞게 수정
 import { JwtService } from '@nestjs/jwt';
-import { Controller, Post, Body, Req } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
 import { Request } from 'express'; // 세션 사용을 위해 필요
 import { AuthService } from './auth.service'; // 로그인 처리 로직
 import { LoginDto } from './login.dto';       // 로그인 요청 DTO
@@ -72,7 +70,7 @@ export class AuthController {
         pass: 'bhlefimthuqwmowh',          // 👈 앱 비밀번호
       },
     });
-
+    
     await transporter.sendMail({
       from: '"인증 시스템" <your_email@gmail.com>',
       to: body.to, // 사용자 이메일로 전송
@@ -86,8 +84,6 @@ export class AuthController {
     };
   }
 
-
-
   // 🔻 여기부터 추가된 소셜 로그인 메서드들 🔻
 
   @Get('kakao')
@@ -95,7 +91,7 @@ export class AuthController {
   kakaoLogin() {
     const REST_API_KEY = process.env.KAKAO_CLIENT_ID;
     const CLIENT_SECRET = process.env.KAKAO_CLIENT_SECRET;
-    const REDIRECT_URI = 'http://localhost:3001/auth/kakao/callback';
+    const REDIRECT_URI = 'http://localhost:3000/auth/kakao/callback';
     const state = Math.random().toString(36).slice(2);
 
     const kakaoUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&state=${state}`;
@@ -114,10 +110,10 @@ export class AuthController {
         {
           params: {
             grant_type: 'authorization_code',
-            client_id: '카카오 REST API 키',
+            client_id: process.env.KAKAO_CLIENT_ID,
             redirect_uri: 'http://localhost:3001/auth/kakao/callback',
             code,
-            client_secret: '카카오 client secret', // 선택사항
+            client_secret: process.env.KAKAO_CLIENT_SECRET, // 선택사항
           },
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',

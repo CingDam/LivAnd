@@ -22,17 +22,5 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "dependencies": {
-    "@nestjs/config": "^4.0.2",
-    "@nestjs/jwt": "^11.0.0",
-    "@nestjs/typeorm": "^11.0.0",
-    "axios": "^1.10.0",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.2",
-    "express": "^5.1.0",
-    "typeorm": "^0.3.24"
-    "@heroicons/react": "^2.2.0",
-    "express-session": "^1.18.1"
-  }
+  ]
 }

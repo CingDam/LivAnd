@@ -7,6 +7,36 @@ import { CardLg, CardSm } from "@repo/ui";
 const Index = () => {
     // 슬라이드 state
     const [activeIndex, setActiveIndex] = useState(0);
+
+    const numArr = [1,2,3,4];
+    const titleArr = ["소프트 스트라이프 와이드카라 블라우스","크림무드 새틴 블라우스","코지블루 루즈핏 셔츠","퓨어라인 화이트 셔츠 원피스"];
+    const tagArr = [
+        ["#프렌치무드","#산뜻한데일리"],
+        ["#심플무드","#세미정장"],
+        ["#청량한무드","#소프트핏"],
+        ["#클래식무드","#여신핏"],
+    ]
+    const priceArr = ["31,500","39,950","27,300","47,200"]
+    const saleArr = ["25%","15%","30%","20%"]
+
+    const colorArr = [
+        {
+            border:["border-[#D5DCE6]"],
+            background:["bg-[#E4E9F1]"]
+        },
+        {
+            border:["border-[#E3DED4]"],
+            background:["bg-[#F1EDE6]"]
+        },
+        {
+            border:["border-[#D8E4F0]"],
+            background:["bg-[#E6F0F8]"]
+        },
+        {
+            border:["border-[#E0E0E0]"],
+            background:["bg-[#F8F8F8]"]
+        },
+    ]
     
     useEffect(() => {
         // setInterval은 반복실행
@@ -47,10 +77,14 @@ const Index = () => {
                     )}>{item}</li>))}
                 </ul>
                 <div className='flex mt-9 space-x-6 justify-center'>
-                    <CardSm/>
-                    <CardSm/>
-                    <CardSm/>
-                    <CardSm/>
+                    {numArr.map((item,index) => <CardSm 
+                        tumbnail={`product/top/blouse-shirt/product${item}/thumbnail.jpg`} 
+                        title={titleArr[index]}
+                        tag={tagArr[index]}
+                        price={priceArr[index]}
+                        sale={saleArr[index]}
+                        color={colorArr[index]}
+                    />)}
                 </div>
             </div>
             <div className="my-[77px]">
