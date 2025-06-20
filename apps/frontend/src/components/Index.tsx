@@ -50,6 +50,7 @@ const Index = () => {
     }, [])
 
     const tabMenuTitle = ['상의/블라우스','원피스','바지','스커트','아우터','악세서리']
+    const productName = ["blouse-shirts","onepiece-set","pants","skirt","outer","accessories/bracelet"]
 
     return (
         <div>
@@ -79,7 +80,7 @@ const Index = () => {
                 <div className='flex mt-9 space-x-6 justify-center'>
                     {numArr.map((item,index) => <CardSm
                         key={index}
-                        tumbnail={`product/top/blouse-shirt/product${item}/thumbnail.jpg`} 
+                        tumbnail={`product/${productName[activeIndex]}/product${item}/${item}-1.jpg`} 
                         title={titleArr[index]}
                         tag={tagArr[index]}
                         price={priceArr[index]}
