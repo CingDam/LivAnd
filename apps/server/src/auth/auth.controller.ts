@@ -4,8 +4,9 @@ import * as nodemailer from 'nodemailer';
 import { Response } from 'express';
 import axios from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from '../user/user.entity'; // 경로는 실제 위치에 맞게 수정
+import { UserSocial } from '../user/user-social.entity'; // <- 소셜 로그인용
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express'; // 세션 사용을 위해 필요
 import { AuthService } from './auth.service'; // 로그인 처리 로직
@@ -30,11 +31,16 @@ type CustomRequest = Request & {
 @Controller('auth')
 export class AuthController {
     constructor(
-      @InjectRepository(User)
-      private readonly userRepository: Repository<User>,
-      private readonly jwtService: JwtService,
-      private readonly authService: AuthService
-    ) {}
+    private readonly dataSource: DataSource,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(UserSocial)
+    private readonly userSocialRepo: Repository<UserSocial>,
+    private readonly jwtService: JwtService,
+    private readonly authService: AuthService,
+  ) {}
+
+
   
   // 로그인
    @Post('login')
@@ -106,7 +112,7 @@ export class AuthController {
   kakaoLogin() {
     const REST_API_KEY = process.env.KAKAO_CLIENT_ID;
     const CLIENT_SECRET = process.env.KAKAO_CLIENT_SECRET;
-    const REDIRECT_URI = 'http://localhost:3000/auth/kakao/callback';
+    const REDIRECT_URI = 'http://localhost:3001/auth/kakao/callback';
     const state = Math.random().toString(36).slice(2);
 
     const kakaoUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&state=${state}`;
@@ -116,9 +122,25 @@ export class AuthController {
     return { url: kakaoUrl };
   }
 
+  // // 생성자에 주입
+  // constructor(
+  //   private readonly dataSource: DataSource,
+  //   @InjectRepository(User)
+  //   private readonly userRepo: Repository<User>,
+  //   @InjectRepository(UserSocial)
+  //   private readonly userSocialRepo: Repository<UserSocial>,
+  //   private readonly jwtService: JwtService,
+  // ) {}
+
+
   @Get('kakao/callback')
   async kakaoCallback(@Query('code') code: string, @Res() res: Response) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
+      // 1. access_token 요청
       const tokenRes = await axios.post(
         'https://kauth.kakao.com/oauth/token',
         null,
@@ -138,39 +160,65 @@ export class AuthController {
 
       const accessToken = tokenRes.data.access_token;
 
-      const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
 
-      const kakaoData = userRes.data;
-      const kakaoId = kakaoData.id.toString();
-      const email = kakaoData.kakao_account?.email || '';
-      const nickname = kakaoData.properties?.nickname || '';
-      const profileImage = kakaoData.properties?.profile_image || '';
-
-      console.log(kakaoId);
-
-      let user = await this.userRepository.findOne({ where: { kakao_id : kakaoId } });
-      if (!user) {
-        user = this.userRepository.create({
-          kakao_id : kakaoId,
-          user_email : email,
-          user_nickname : nickname,
-          user_pwd: '',      // 소셜 로그인 시 임의 처리
-          user_phone: '',    // 소셜 로그인 시 임의 처리
-          // user_pwd나 user_phone은 소셜 로그인이라면 null 또는 빈 문자열로 처리 가능
+        // 2. 유저 정보 요청
+        const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
+          headers: { Authorization: `Bearer ${accessToken}` },
         });
-        await this.userRepository.save(user); // db에 저장
+
+        const kakaoData = userRes.data;
+        const kakaoId = kakaoData.id.toString();
+        const email = kakaoData.kakao_account?.email || '';
+        const nickname = kakaoData.properties?.nickname || '';
+
+        console.log(kakaoId);
+
+        // 3. 기존 user_social_tb에 기존 유저 찾기
+        const existing = await queryRunner.manager.findOne(UserSocial, {
+          where: { sns_uid: kakaoId, provider: 'kakao' },
+          relations: ['user'],
+        });
+
+
+        let user: User;
+        
+        if (existing) {
+          user = existing.user;
+        } else {
+          // 4. user_tb 저장
+          user = queryRunner.manager.create(User,{
+            user_email : email,
+            user_nickname : nickname,
+            user_pwd: '',      // 소셜 로그인 시 임의 처리
+            user_phone: '',    // 소셜 로그인 시 임의 처리
+            // user_pwd나 user_phone은 소셜 로그인이라면 null 또는 빈 문자열로 처리 가능
+          });
+          await queryRunner.manager.save(user); // db에 저장
+        }
+
+        // 5. user_social_tb 저장
+        const userSocial = queryRunner.manager.create(UserSocial, {
+          sns_uid: kakaoId,
+          provider: 'kakao',
+          user,
+        });
+        await queryRunner.manager.save(userSocial);
+      
+
+        // 6. 트랜잭션 완료
+        await queryRunner.commitTransaction();
+        await queryRunner.release();
+
+        const jwt = this.jwtService.sign({ sub: user.user_num });
+        
+        return res.redirect(`http://localhost:3000/social-login-success?token=${jwt}`);
+      } catch (err) {
+        await queryRunner.rollbackTransaction();
+        await queryRunner.release();
+        console.error('카카오 로그인 실패:', err);
+        return res.status(500).send('카카오 로그인 실패');
       }
-
-      const jwt = this.jwtService.sign({ sub: user.user_num });
-
-      return res.redirect(`http://localhost:3000/social-login-success?token=${jwt}`);
-    } catch (err) {
-      console.error('카카오 로그인 실패:', err);
-      return res.status(500).send('카카오 로그인 실패');
     }
-  }
 
 @Get('naver')
 @Redirect()
@@ -235,4 +283,4 @@ naverLogin() {
       return res.status(500).send('네이버 로그인 실패');
     }
   }
-}
+};

@@ -6,10 +6,11 @@ import { AuthService } from '../auth/auth.service';
 import { UserRepository } from '../user/user.dao';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
+import { UserSocial } from '../user/user-social.entity'; // <- 소셜 로그인용
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]), // 👈 요거 추가
+    TypeOrmModule.forFeature([User, UserSocial]), // 👈 요거 추가
     JwtModule.register({ secret: 'your_jwt_secret' }) // 임시로 secret 설정 (실제는 .env에서 가져오기)
   ],
   controllers: [AuthController],
