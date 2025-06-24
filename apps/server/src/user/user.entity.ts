@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import { UserSocial } from './user-social.entity'
 
 // user_tb 테이블과 매핑되는 Entity
 @Entity('user_tb')
@@ -29,4 +30,12 @@ export class User {
 
   @Column({ default: 0 })
   point: number; // 초기 포인트
+
+  // user.entity.ts
+  @OneToMany(() => UserSocial, (social) => social.user)
+  socials: UserSocial[];
+
 }
+
+
+
