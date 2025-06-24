@@ -194,7 +194,7 @@ export class AuthController {
             // user_pwd나 user_phone은 소셜 로그인이라면 null 또는 빈 문자열로 처리 가능
           });
           await queryRunner.manager.save(user); // db에 저장
-        }
+        
 
         // 5. user_social_tb 저장
         const userSocial = queryRunner.manager.create(UserSocial, {
@@ -203,7 +203,7 @@ export class AuthController {
           user,
         });
         await queryRunner.manager.save(userSocial);
-      
+      }
 
         // 6. 트랜잭션 완료
         await queryRunner.commitTransaction();
@@ -234,53 +234,105 @@ naverLogin() {
   @Get('naver/callback')
   async naverCallback(@Query() query, @Res() res: Response) {
     try {
-      const { code, state } = query;
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
 
-      const tokenRes = await axios.post(
-        `https://nid.naver.com/oauth2.0/token`,
-        null,
-        {
-          params: {
-            grant_type: 'authorization_code',
-            client_id: process.env.NAVER_CLIENT_ID,
-            client_secret: process.env.NAVER_CLIENT_SECRET,
-            code,
-            state,
+      try {
+        const { code, state } = query;
+
+        // 1. access_token 요청
+        const tokenRes = await axios.post(
+          `https://nid.naver.com/oauth2.0/token`,
+          null,
+          {
+            params: {
+              grant_type: 'authorization_code',
+              client_id: process.env.NAVER_CLIENT_ID,
+              client_secret: process.env.NAVER_CLIENT_SECRET,
+              code,
+              state,
+            },
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
           },
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
-      );
+        );
 
-      const accessToken = tokenRes.data.access_token;
+        const accessToken = tokenRes.data.access_token;
 
-      const userRes = await axios.get('https://openapi.naver.com/v1/nid/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      const naverData = userRes.data.response;
-      const naverId = naverData.id;
-      const email = naverData.email || '';
-      const nickname = naverData.nickname || '';
-
-      let user = await this.userRepository.findOne({ where: { naver_id : naverId } }); // kakao_id → 나중에 naver_id 따로 만들면 좋음
-      if (!user) {
-        user = this.userRepository.create({
-          naver_id: naverId, // 임시로 사용
-          user_email: email,
-          user_nickname: nickname,
-          user_pwd: '',
-          user_phone: '',
+        // 2. 사용자 정보 요청
+        const userRes = await axios.get('https://openapi.naver.com/v1/nid/me', {
+          headers: { Authorization: `Bearer ${accessToken}` },
         });
-        await this.userRepository.save(user);
-      }
 
-      const jwt = this.jwtService.sign({ sub: user.user_num });
-      return res.redirect(`http://localhost:3000/social-login-success?token=${jwt}`);
+        const naverData = userRes.data.response;
+        const naverId = naverData.id;
+        const email = naverData.email || '';
+        const nickname = naverData.nickname || '';
+        const name = naverData.name || '';
+        const user_phone = naverData.mobile || '';
+
+        // 3. user_social_tb에서 기존 유저 찾기
+        const existing = await queryRunner.manager.findOne(UserSocial, {
+          where: { sns_uid: naverId, provider: 'naver'},
+          relations: ['user'],
+        });
+
+        let user: User;
+
+        if (existing) {
+          user = existing.user;
+        } else {
+          // 4. user_tb 저장
+          user = queryRunner.manager.create(User, {
+            user_email: email,
+            user_nickname: nickname,
+            uesr_name: name,
+            user_phone: user_phone,
+            user_pwd: '',
+          });
+          await queryRunner.manager.save(user);
+        }
+
+        // 5. user_social_tb 저장
+        const userSocial = queryRunner.manager.create(UserSocial, {
+          sns_uid: naverId,
+          provider: 'naver',
+          user,
+        });
+        await queryRunner.manager.save(userSocial);
+
+        // 6. 커밋 및 연결 해제
+        await queryRunner.commitTransaction();
+        await queryRunner.release();
+
+        // const jwt = this.jwtService.sign({ sub: user.user_num });
+        // return res.redirect(`http://localhost: 3000/social-login-success?token=${jwt}`)
+
+        // let user = await this.userRepository.findOne({ where: { naver_id : naverId } }); // kakao_id → 나중에 naver_id 따로 만들면 좋음
+        // if (!user) {
+        //   user = this.userRepository.create({
+        //     naver_id: naverId, // 임시로 사용
+        //     user_email: email,
+        //     user_nickname: nickname,
+        //     user_pwd: '',
+        //     user_phone: '',
+        //   });
+        //   await this.userRepository.save(user);
+        // }
+
+        const jwt = this.jwtService.sign({ sub: user.user_num });
+        return res.redirect(`http://localhost:3000/social-login-success?token=${jwt}`);
+      } catch (err) {
+        await queryRunner.rollbackTransaction();
+        await queryRunner.release();
+        console.error('네이버 로그인 실패:', err);
+        return res.status(500).send('네이버 로그인 실패');
+      }
     } catch (err) {
-      console.error('네이버 로그인 실패:', err);
-      return res.status(500).send('네이버 로그인 실패');
+      console.error('서버 오류:', err);
+      return res.status(500).send('서버 오류');
     }
   }
-};
+}
