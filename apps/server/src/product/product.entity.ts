@@ -14,10 +14,10 @@ export class ProductTb {
   prod_num: number;
 
   @Column()
-  prod_name: string;
-
-  @Column()
   price: number;
+
+  @Column({ type: 'varchar', length: 255 })
+  prod_name: string;
 
   @Column()
   create_date: Date;
@@ -29,7 +29,7 @@ export class ProductTb {
   view_count: number;
 
   @ManyToOne(() => CateTb, cate => cate.products)
-  @JoinColumn({ name: 'cate_tb.cate_num' })
+  @JoinColumn({ name: 'cate_num' })
   category: CateTb;
 }
 

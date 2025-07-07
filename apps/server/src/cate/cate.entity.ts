@@ -10,6 +10,12 @@ export class CateTb {
   @Column()
   cate_name: string;
 
+  @Column({ nullable: true })
+  cate_depth: number;
+
+  @Column({ nullable: true })
+  parent_id: number;
+
   @OneToMany(() => ProductTb, product => product.category)
   products: ProductTb[];
 }

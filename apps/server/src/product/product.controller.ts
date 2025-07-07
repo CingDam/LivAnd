@@ -12,6 +12,12 @@ export class ProductController {
   private readonly productRepository: Repository<ProductTb>,
 ) {}
 
+@Get('test')
+test() {
+  console.log('🔥 test 라우터 들어옴');
+  return 'ok';
+}
+
     @Get()
     async getAllProducts(): Promise<ProductTb[]> {
     const products = await this.productRepository.find({ relations: ['category'] });
@@ -32,65 +38,95 @@ export class ProductController {
 
     // return products;
 
+// @Get('blouse-shirt')
+// getBlouseShirtProducts(): Promise<ProductTb[]> {
+//   return this.getProductsByCateNames(['블라우스', '셔츠']);
+// }
+
 @Get('blouse-shirt')
-getBlouseShirtProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('blouse-shirt');
+async getBlouseShirtProducts(): Promise<ProductTb[]> {
+  const result = await this.productRepository
+    .createQueryBuilder('product')
+    .leftJoinAndSelect('product.category', 'category')
+    .where('category.cate_name IN (:...names)', { names: ['블라우스', '셔츠'] })
+    .andWhere('product.is_active = 1')
+    .getMany();
+
+  console.log('🧥 blouse-shirt 결과:', result);
+  return result;
 }
 
 @Get('outer')
-getOuterProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('outer');
+async getOuterProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['아우터']);
+  console.log('🧥 outer 결과:', result);
+  return result;
 }
 
 @Get('knit-cardigan')
-getKnitCardiganProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('knit-cardigan');
+async getKnitCardiganProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['니트', '가디건']);
+  console.log('🧶 knit-cardigan 결과:', result);
+  return result;
 }
 
 @Get('tshirt')
-getTshirtProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('tshirt');
+async getTshirtProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['티셔츠']);
+  console.log('👕 tshirt 결과:', result);
+  return result;
 }
 
 @Get('onepiece')
-getOnepieceProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('onepiece');
+async getOnepieceProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['원피스']);
+  console.log('👗 onepiece 결과:', result);
+  return result;
 }
 
 @Get('skirt')
-getSkirtProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('skirt');
+async getSkirtProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['스커트']);
+  console.log('👚 skirt 결과:', result);
+  return result;
 }
 
 @Get('pants')
-getPantsProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('pants');
+async getPantsProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['팬츠']);
+  console.log('👖 pants 결과:', result);
+  return result;
 }
 
 @Get('necklace')
-getNecklaceProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('necklace');
+async getNecklaceProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['목걸이']);
+  console.log('📿 necklace 결과:', result);
+  return result;
 }
 
 @Get('bracelet')
-getBraceletProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('bracelet');
+async getBraceletProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['팔찌']);
+  console.log('🪢 bracelet 결과:', result);
+  return result;
 }
 
 @Get('ring')
-getRingProducts(): Promise<ProductTb[]> {
-  return this.getProductsByFixedCategory('ring');
+async getRingProducts(): Promise<ProductTb[]> {
+  const result = await this.getProductsByCateNames(['반지']);
+  console.log('💍 ring 결과:', result);
+  return result;
 }
 
-// 아래는 중복 제거를 위한 private 메서드
-private getProductsByFixedCategory(category: string): Promise<ProductTb[]> {
-    return this.productRepository
-        .createQueryBuilder('product')
-        .leftJoinAndSelect('product.category', 'category')
-        .where('category.cate_name = :category', { category })
-        .andWhere('product.is_active = 1')
-        .getMany();
-    }
+private getProductsByCateNames(cateNames: string[]): Promise<ProductTb[]> {
+  return this.productRepository
+    .createQueryBuilder('product')
+    .leftJoinAndSelect('product.category', 'category')
+    .where('category.cate_name IN (:...cateNames)', { cateNames })
+    .andWhere('product.is_active = 1')
+    .getMany();
 }
 
 
+}
