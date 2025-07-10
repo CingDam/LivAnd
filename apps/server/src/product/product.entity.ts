@@ -3,9 +3,11 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { CateTb } from '../cate/cate.entity'; // 카테고리 엔티티
+import { ProductVariant } from '../variant/product-variant.entity'; // 바리언트 엔터티
 
 
 @Entity('product_tb')
@@ -31,5 +33,8 @@ export class ProductTb {
   @ManyToOne(() => CateTb, cate => cate.products)
   @JoinColumn({ name: 'cate_num' })
   category: CateTb;
+
+  @OneToMany(() => ProductVariant, variant => variant.product)
+  variants: ProductVariant[];
 }
 
