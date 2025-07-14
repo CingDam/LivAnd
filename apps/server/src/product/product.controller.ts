@@ -128,5 +128,29 @@ private getProductsByCateNames(cateNames: string[]): Promise<ProductTb[]> {
     .getMany();
 }
 
+@Get('with-variants')
+async getProductsWithVariants(): Promise<ProductTb[]> {
+  const result = await this.productRepository.find({
+    
+    relations: [
+      'category',
+      'variants',
+      'variants.color',
+      'variants.size',
+    ],
+    where: { is_active: true },
+  });
+
+  result.forEach(p => {
+    console.log(`상품: ${p.prod_name}`);
+    p.variants.forEach(v => {
+      console.log(`  - 색상: ${v.color?.color_name}`);
+      console.log(`  - 사이즈: ${v.size?.prod_size}`);
+    });
+  });
+
+  return result;
+}
+
 
 }
