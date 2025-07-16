@@ -10,7 +10,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
       database: 'livand',
       // entities: [__dirname + '/**/*.entity.{js,ts}'],
       entities: [__dirname + '/../**/*.entity.{js,ts}'],
-      synchronize: true, // 배포시 false해주기!
+      synchronize: false, // 배포시 false해주기!
       connectorPackage: "mysql2",
       logging: true,
 }

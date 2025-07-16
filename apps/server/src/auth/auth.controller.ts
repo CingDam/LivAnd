@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express'; // 세션 사용을 위해 필요
 import { AuthService } from './auth.service'; // 로그인 처리 로직
 import { LoginDto } from './login.dto';       // 로그인 요청 DTO
+import { serialize } from 'cookie';
 
 
 // 세션에 저장할 유저 타입 정의
@@ -65,17 +66,17 @@ export class AuthController {
   @Get('me') // 프론트에서 자동 로그인 확인 요청
   me(@Req() req: CustomRequest) {
   if (req.session.user) {
-    return {
-      loggedIn: true,
-      user: req.session.user,
-    };
-  } else {
-    return {
-      loggedIn: false,
-      message: '로그인되어 있지 않습니다.',
-    };
+      return {
+        loggedIn: true,
+        user: req.session.user,
+      };
+    } else {
+      return {
+        loggedIn: false,
+        message: '로그인되어 있지 않습니다.',
+      };
+    }
   }
-}
 
   @Post('send-email')
   async sendCode(@Body() body: { to: string }) {
@@ -210,8 +211,16 @@ export class AuthController {
         await queryRunner.release();
 
         const jwt = this.jwtService.sign({ sub: user.user_num });
+
+        res.setHeader('Set-Cookie', serialize('token', jwt, {
+          httpOnly: true,
+          sameSite:'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        }))
         
-        return res.redirect(`http://localhost:3000/social-login-success?token=${jwt}`);
+        
+        return res.redirect(`http://localhost:3000/social-login-success`);
       } catch (err) {
         await queryRunner.rollbackTransaction();
         await queryRunner.release();
@@ -258,6 +267,7 @@ naverLogin() {
             },
           },
         );
+
 
         const accessToken = tokenRes.data.access_token;
 
@@ -323,7 +333,15 @@ naverLogin() {
         // }
 
         const jwt = this.jwtService.sign({ sub: user.user_num });
-        return res.redirect(`http://localhost:3000/social-login-success?token=${jwt}`);
+
+        res.setHeader('Set-Cookie', serialize('token', jwt, {
+          httpOnly: true,
+          sameSite:'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        }))
+
+        return res.redirect(`http://localhost:3000/social-login-success`);
       } catch (err) {
         await queryRunner.rollbackTransaction();
         await queryRunner.release();
