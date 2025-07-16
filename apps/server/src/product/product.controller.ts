@@ -6,23 +6,23 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 @Controller('products')
-export class ProductController {
-  constructor(
-  @InjectRepository(ProductTb)
-  private readonly productRepository: Repository<ProductTb>,
-) {}
+  export class ProductController {
+    constructor(
+    @InjectRepository(ProductTb)
+    private readonly productRepository: Repository<ProductTb>,
+  ) {}
 
-@Get('test')
-test() {
-  console.log('🔥 test 라우터 들어옴');
-  return 'ok';
-}
+  @Get('test')
+  test() {
+    console.log('🔥 test 라우터 들어옴');
+    return 'ok';
+  }
 
     @Get()
     async getAllProducts(): Promise<ProductTb[]> {
-    const products = await this.productRepository.find({ relations: ['category'] });
-    console.log('조회된 상품들:', products); // 콘솔창에서 확인
-    return products;
+      const products = await this.productRepository.find({ relations: ['category'] });
+      console.log('조회된 상품들:', products); // 콘솔창에서 확인
+      return products;
     }
 
     // @Get(':category')
