@@ -31,6 +31,7 @@ import { Repository } from 'typeorm';
     // ): Promise<ProductTb[]> {  // 그걸 이용해 cate_tb.cate_name = 'outer' 조건으로 product_tb 조회함
     // const products = await this.productRepository
     //     .createQueryBuilder('product')
+
     //     .leftJoinAndSelect('product.category', 'category')  // leftJoinAndSelect으로 조인해서 카테고리 정보도 같이 가져옴
     //     .where('category.cate_name = :category', { category })
     //     .andWhere('product.is_active = 1')
@@ -48,6 +49,9 @@ async getBlouseShirtProducts(): Promise<ProductTb[]> {
   const result = await this.productRepository
     .createQueryBuilder('product')
     .leftJoinAndSelect('product.category', 'category')
+    .leftJoinAndSelect('product.variants', 'variant')
+    .leftJoinAndSelect('variant.color', 'color')
+    .leftJoinAndSelect('variant.size', 'size')
     .where('category.cate_name IN (:...names)', { names: ['블라우스', '셔츠'] })
     .andWhere('product.is_active = 1')
     .getMany();
@@ -123,9 +127,15 @@ private getProductsByCateNames(cateNames: string[]): Promise<ProductTb[]> {
   return this.productRepository
     .createQueryBuilder('product')
     .leftJoinAndSelect('product.category', 'category')
+    .leftJoinAndSelect('product.variants', 'variant')
+    .leftJoinAndSelect('variant.color', 'color')
+    .leftJoinAndSelect('variant.size', 'size')
     .where('category.cate_name IN (:...cateNames)', { cateNames })
     .andWhere('product.is_active = 1')
     .getMany();
+
+    
+    
 }
 
 @Get('with-variants')
